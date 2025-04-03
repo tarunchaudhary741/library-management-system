@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        input, button, select {
+            margin: 5px 0;
+            padding: 10px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-height: 80vh;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Library Management System</h2>
+        <h3>Add Book</h3>
+        <input type="text" id="bookTitle" placeholder="Enter Book Title">
+        <input type="text" id="bookAuthor" placeholder="Enter Book Author">
+        <input type="number" id="bookQuantity" placeholder="Enter Number of Copies">
+        <button onclick="addBook()">Add Book</button>
+        <button onclick="openBookListDialog()">View All Books</button>
+        
+    </div>
+    
+    <div class="container">
+        <h3>Student Management</h3>
+        <input type="text" id="studentName" placeholder="Enter Student Name">
+        <input type="text" id="studentId" placeholder="Enter Student ID">
+        <button onclick="addStudent()">Add Student</button>
+        <button onclick="openStudentListDialog()">View All Students</button>
+        
+    
+    <div id="bookListModal" class="modal">
+        <h3>All Books</h3>
+        <input type="text" id="searchBookModal" placeholder="Search Books..." onkeyup="searchBooksModal()">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Total Copies</th>
+                    <th>Issued</th>
+                    <th>Available</th>
+                    <th>Action1</th>
+                    <th>Action2</th>
+                </tr>
+            </thead>
+            <tbody id="modalBookList"></tbody>
+        </table>
+        <button onclick="closeBookListDialog()">Close</button>
+    </div>
+
+    <div id="studentListModal" class="modal">
+        <h3>All Students</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>ID</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="modalStudentList"></tbody>
+        </table>
+        <button onclick="closeStudentListDialog()">Close</button>
+    </div>
+
+    <div id="issueBookModal" class="modal">
+        <h3>Issue Book</h3>
+        <label for="studentSelect">Select Student:</label>
+        <select id="studentSelect"></select>
+        <label for="daysSelect">Days to Issue:</label>
+        <input type="number" id="daysSelect" min="1" placeholder="Enter days">
+        <button onclick="confirmIssue()">Confirm Issue</button>
+        <button onclick="closeIssueBookDialog()">Cancel</button>
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            loadBooks();
+            loadStudents();
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById("searchBookModal");
+
+    // Listen for the input event and trigger the searchBooksModal function
+    searchInput.addEventListener("input", searchBooksModal);
+});
+
+// Search function that filters books based on the search term
+function searchBooksModal() {
+    let searchTerm = document.getElementById("searchBookModal").value.toLowerCase(); // Get the search term
+    let books = JSON.parse(localStorage.getItem("books")) || [];
+
+    // Filter books based on the title or author matching the search term
+    let filteredBooks = books.filter(book => 
+        book.title.toLowerCase().includes(searchTerm) || 
+        book.author.toLowerCase().includes(searchTerm)
+    );
+
+    // Display the filtered books
+    displayBooks(filteredBooks);
+}
+
+function displayBooks(books) {
+    let booksList = document.getElementById("modalBookList");
+    booksList.innerHTML = "";  
+
+    
+    books.forEach((book, index) => {
+        let tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${book.title}</td>
+            <td>${book.author}</td>
+            <td>${book.total}</td>
+            <td>${book.issued}</td>
+            <td>${book.available}</td>
+            <td><button onclick="openIssueBookDialog(${index})">Issue</button></td>
+            <td><button onclick="removeBook(${index})">Remove</button></td>
+        `;
+        booksList.appendChild(tr);
+    });
+}
+
+        
+        function openIssueBookDialog(index) {
+            issueIndex = index;
+            let students = JSON.parse(localStorage.getItem("students")) || [];
+            let studentSelect = document.getElementById("studentSelect");
+            studentSelect.innerHTML = students.map(s => `<option value="${s.id}">${s.name} (${s.id})</option>`).join("");
+            document.getElementById("issueBookModal").style.display = "block";
+        }
+
+        function closeIssueBookDialog() {
+            document.getElementById("issueBookModal").style.display = "none";
+        }
+
+
+        function confirmIssue() {
+            let books = JSON.parse(localStorage.getItem("books")) || [];
+
+        
+            if (issueIndex < 0 || issueIndex >= books.length) return;
+
+            let book = books[issueIndex];
+
+
+            if (book.available <= 0) {
+                alert("Sorry, no copies are available to issue.");
+                closeIssueBookDialog(); 
+                return;
+            }
+            book.issued += 1;
+            book.available -= 1;
+
+        
+            localStorage.setItem("books", JSON.stringify(books));
+
+    
+            closeIssueBookDialog();
+            loadBooks(); 
+        }
+
+        function addBook() {
+            let title = document.getElementById("bookTitle").value.trim();
+            let author = document.getElementById("bookAuthor").value.trim();
+            let quantity = parseInt(document.getElementById("bookQuantity").value.trim());
+            
+            if (!title || !author || isNaN(quantity) || quantity <= 0) {
+                alert("Please enter valid book details.");
+                return;
+            }
+            
+            let books = JSON.parse(localStorage.getItem("books")) || [];
+            books.push({ title, author, total: quantity, issued: 0, available: quantity });
+            localStorage.setItem("books", JSON.stringify(books));
+            
+            document.getElementById("bookTitle").value = "";
+            document.getElementById("bookAuthor").value = "";
+            document.getElementById("bookQuantity").value = "";
+            
+            loadBooks(); // Refresh the book list after adding a new book
+        }
+
+        function openBookListDialog() {
+            loadBooks(); // Load books before displaying
+            document.getElementById("bookListModal").style.display = "block";
+        }
+
+        function closeBookListDialog() {
+            document.getElementById("bookListModal").style.display = "none";
+        }
+
+        function loadBooks() {
+            let books = JSON.parse(localStorage.getItem("books")) || [];
+            let modalBookList = document.getElementById("modalBookList");
+            modalBookList.innerHTML = "";
+            books.forEach((book, index) => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${book.title}</td>
+                    <td>${book.author}</td>
+                    <td>${book.total}</td>
+                    <td>${book.issued}</td>
+                    <td>${book.available}</td>
+                    <td><button onclick="openIssueBookDialog(${index})">issue</button></td>
+                    <td><button onclick="removeBook(${index})">Remove</button></td>
+                `;
+                modalBookList.appendChild(row);
+            });
+        }
+
+        function removeBook(index) {
+            let books = JSON.parse(localStorage.getItem("books")) || [];
+            books.splice(index, 1);
+            localStorage.setItem("books", JSON.stringify(books));
+            loadBooks();
+        }
+
+        function openStudentListDialog() {
+            loadStudents();
+            document.getElementById("studentListModal").style.display = "block";
+        }
+
+        function closeStudentListDialog() {
+            document.getElementById("studentListModal").style.display = "none";
+        }
+
+        function addStudent() {
+            let name = document.getElementById("studentName").value.trim();
+            let id = document.getElementById("studentId").value.trim();
+            
+            if (!name || !id) {
+                alert("Please enter valid student details.");
+                return;
+            }
+            
+            let students = JSON.parse(localStorage.getItem("students")) || [];
+            students.push({ name, id });
+            localStorage.setItem("students", JSON.stringify(students));
+            
+            document.getElementById("studentName").value = "";
+            document.getElementById("studentId").value = "";
+            loadStudents();
+        }
+
+        function loadStudents() {
+            let students = JSON.parse(localStorage.getItem("students")) || [];
+            let modalStudentList = document.getElementById("modalStudentList");
+            modalStudentList.innerHTML = "";
+            students.forEach((student, index) => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${student.name}</td>
+                    <td>${student.id}</td>
+                    <td><button onclick="removeStudent(${index})">Remove</button></td>
+                `;
+                modalStudentList.appendChild(row);
+            });
+        }
+
+        function removeStudent(index) {
+            let students = JSON.parse(localStorage.getItem("students")) || [];
+            students.splice(index, 1);
+            localStorage.setItem("students", JSON.stringify(students));
+            loadStudents();
+        }
+
+        
+    </script>
+</body>
+</html>
