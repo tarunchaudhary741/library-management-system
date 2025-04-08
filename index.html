@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Library Management System</h2>
+        <h3>Add Book</h3>
+        <input type="text" id="bookTitle" placeholder="Enter Book Title">
+        <input type="text" id="bookAuthor" placeholder="Enter Book Author">
+        <input type="number" id="bookQuantity" placeholder="Enter Number of Copies">
+        <button onclick="addBook()">Add Book</button>
+        <button onclick="openBookListDialog()">View All Books</button>
+        
+    </div>
+    
+    <div class="container">
+        <h3>Student Management</h3>
+        <input type="text" id="studentName" placeholder="Enter Student Name">
+        <input type="text" id="studentId" placeholder="Enter Student ID">
+        <button onclick="addStudent()">Add Student</button>
+        <button onclick="openStudentListDialog()">View All Students</button>
+    </div>
+        
+    
+    <div id="bookListModal" class="modal">
+        <h3>All Books</h3>
+        <input type="text" id="searchBookModal" placeholder="Search Books..." onkeyup="searchBooksModal()">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Total Copies</th>
+                    <th>Issued</th>
+                    <th>Available</th>
+                    <th>Action1</th>
+                    <th>Action2</th>
+                </tr>
+            </thead>
+            <tbody id="modalBookList"></tbody>
+        </table>
+        <button onclick="closeBookListDialog()">Close</button>
+    </div>
+
+
+    <div id="studentListModal" class="modal">
+        <h3>All Students</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>ID</th>
+                    <th>Issued Books</th>
+                    <th>Action</th>
+                    <th>View Issued Books</th>
+                </tr>
+            </thead>
+            <tbody id="modalStudentList"></tbody>
+        </table>
+        <button onclick="closeStudentListDialog()">Close</button>
+    </div>
+
+    <div id="issuedBooksModal" class="modal">
+        <h3>Books Issued</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>duration</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="issuedBooksList"></tbody>
+        </table>
+        <button onclick="closeIssuedBooksDialog()">Close</button>
+    </div>
+
+    <div id="issueBookModal" class="modal">
+        <h3>Issue Book</h3>
+        <label for="studentSelect">Select Student:</label>
+        <select id="studentSelect"></select>
+        <label for="daysSelect">Days to Issue:</label>
+        <input type="number" id="daysSelect" min="1" placeholder="Enter days">
+        <button onclick="confirmIssue()">Confirm Issue</button>
+        <button onclick="closeIssueBookDialog()">Cancel</button>
+    </div>
+    
+    <script src="issued.js"></script>
+    <script src="issue.js"></script>
+    <script src="book.js"></script>
+    <script src="student.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
